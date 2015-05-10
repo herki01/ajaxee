@@ -1,2 +1,2 @@
 # ajaxee
-jQuery plugin to make your javascript ajax code simle
+jQuery plugin to make your browser AJAX code simle
