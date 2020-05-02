@@ -40,12 +40,10 @@
                     ajaxObj.processResponse( xhr );
                 }
             });
-            
-        } else if ( typeof param1 == "object" && param1.constructor == Array ) {
+        } else if ( typeof param1 == "object" /*&& param1.constructor == Array */) {
             // ajaxee( {options} );
             options = param1;
-            
-            if ( typeof options.success !== "undefined" ) {
+            if ( typeof options.success === "undefined" ) {
                 options.success = function( data , status , xhr ) {
                     ajaxObj.processResponse( xhr );
                 }
@@ -67,12 +65,12 @@
     // processing
     var ajaxObj = {
     	processResponse:function( jqXHR ) {
-            return ajaxObj.processJsonString( jqXHR.responseText );
+            return ajaxObj.processJsonString( jqXHR.responseText, jqXHR.status );
     	},
-    	processJsonString : function ( jsonString ) {
+    	processJsonString : function ( jsonString, status ) {
     		var json = jQuery.parseJSON( jsonString );
 //    		if (json && json.result && json.result.ret === true){
-    			return ajaxObj.processJsonResponse( json );
+    			return ajaxObj.processJsonResponse( json, status );
 /*    		} else {
     		  if (jqXHR.status != 0){
           			console.log("Pri operacii nastala chyba:" + jsonString);
@@ -82,7 +80,7 @@
     		}    	    
     		*/
     	},
-    	processJsonResponse:function( json ) {
+    	processJsonResponse:function( json, status ) {
     	    var result;
     	    if ( json.result ) {
     	    	// backward compatibility
@@ -107,9 +105,9 @@
     			case "confirm" :
     				return ajaxObj.processConfirm( result );
     			case "jsEval" :
-    				return ajaxObj.processJSEval( result );
+    				return ajaxObj.processJSEval( result, status );
     			case "multi" :
-    				return ajaxObj.processMulti( result );
+    				return ajaxObj.processMulti( result, status );
     			case "value" :
     				return ajaxObj.processValue( result );
     			// new
@@ -120,7 +118,7 @@
     			case "append":
     			    return ajaxObj.processAppend( result );
                 case "js" :
-    				return ajaxObj.processJSEval( result );
+    				return ajaxObj.processJSEval( result, status );
     			default:
     				alert( "ajaxee unknown type:" + result.type );
     		}		
@@ -277,14 +275,14 @@
     			.html( "" );
     		return json.ret;
     	},
-    	processJSEval : function( json ) {
+    	processJSEval : function( json, status ) {
     		eval( json.data );
     		return json.ret;
     	},
-    	processMulti : function( json ) {
+    	processMulti : function( json, status ) {
     		var ret = true;
     		for ( var i = 0; i < json.data.length; i++ ) {
-    			if ( ajaxObj.processJsonResponse( json.data[i] ) === false ) {
+    			if ( ajaxObj.processJsonResponse( json.data[i], status ) === false ) {
     				ret = false;
     			}
     		}
